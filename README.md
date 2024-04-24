@@ -3,7 +3,7 @@ Doctor Recommendation System The Doctor Recommendation System is a web applicati
 
 Doctor Recommendation System
 
-Table of Contents
+Table of content
 
 Prerequisites
 
