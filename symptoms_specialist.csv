@@ -1,0 +1,26 @@
+symptoms,specialist
+Fever,General Physician
+Fever,General Physician
+Cough,General Physician
+Sore throat,General Physician
+Fatigue,General Physician
+Nausea,General Physician
+Muscle pain,Rheumatologist
+Dizziness,Neurologist
+Abdominal pain,Gastroenterologist
+Vomiting,Gastroenterologist
+Diarrhea,Gastroenterologist
+Joint pain,Rheumatologist
+Rash,Dermatologist
+Itching,Dermatologist
+Burning sensation,Urologist
+Frequent urination,Urologist
+Bleeding,Gynecologist
+Irregular periods,Gynecologist
+Difficulty swallowing,Gastroenterologist
+Heartburn,Gastroenterologist
+Blurred vision,Ophthalmologist
+Eye redness,Ophthalmologist
+Anxiety,Psychiatrist
+Depression,Psychiatrist
+Memory loss,Neurologist
