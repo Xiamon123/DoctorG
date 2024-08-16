@@ -1,52 +1,40 @@
-import pandas as pd
-import streamlit as st
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.svm import LinearSVC
-import streamlit.components.v1 as components
+import requests
+from sentence_transformers import SentenceTransformer, util
 
-# Load the doctor dataset from CSV
-doctors_df = pd.read_csv('doctors.csv')
+model = SentenceTransformer('all-MiniLM-L6-v2')
 
-# Load the symptoms and specialist dataset from CSV
-symptoms_specialist_df = pd.read_csv('symptoms_specialist.csv')
+# user_input = input("Enter the description: ")
+user_input = "Feeling a pain in the chest on the top part of the body"
 
-# Application Frontend
-st.title('Doctor Recommendation System')
+user_emb = model.encode(user_input)
 
-# Collect user symptoms
-selected_symptoms = st.multiselect('Select your symptoms:', symptoms_specialist_df['symptoms'].unique())
+symptom_name = "chest%20pain"
+get_request = "http://localhost:8080/MAIN/concepts/?term={symptom_name}"
+response = requests.get(get_request.format(symptom_name=symptom_name))
 
-# Filter specialist based on selected symptoms
-filtered_specialist = symptoms_specialist_df[symptoms_specialist_df['symptoms'].isin(selected_symptoms)]
+data = response.json()
 
-if filtered_specialist['specialist'].nunique() < 2:
-    st.write('Insufficient data to make a recommendation.')
-else:
-    # Train the classifier
-    vectorizer = TfidfVectorizer()
-    X = vectorizer.fit_transform(filtered_specialist['symptoms'])
-    y = filtered_specialist['specialist']
-    classifier = LinearSVC()
-    classifier.fit(X, y)
+max_score = 0
+max_score_concept = None
+max_score_description = None
 
-    # Predict specialist for the selected symptoms
-    X_user = vectorizer.transform(selected_symptoms)
-    predicted_specialist = classifier.predict(X_user)
+for concept in data['items']:
+    concept_id = concept['conceptId']
+    description = concept['fsn']['term']
 
-    # Filter doctors based on predicted specialist
-    filtered_doctors = doctors_df[doctors_df['Specialty'].isin(predicted_specialist)]
+    concept_emb = model.encode(description)
 
-    # Display recommended doctors
-    if not filtered_doctors.empty:
-        st.subheader('Recommended Doctors:')
-        for index, row in filtered_doctors.iterrows():
-            st.write(f"### {row['Name']}")
-            st.write(f"**Specialty:** {row['Specialty']}")
-            st.write(f"**Location:** {row['Location']}")
-            st.write(f"**Experience:** {row['Experience']} years")
-            st.write("---")
-    else:
-        st.write('No doctors found for the selected symptoms.')
+    cosine_scores = util.pytorch_cos_sim(user_emb, concept_emb)
+
+    print("Sentence: ", description, "\nSimilarity: ", cosine_scores.item(), "\n")
+
+    if cosine_scores.item() > max_score:
+        max_score = cosine_scores.item()
+        max_score_concept = concept_id
+        max_score_description = description
+
+print("User input: ", user_input)
+print("Most similar concept: ", max_score_concept, "\nDescription: ", max_score_description, "\nSimilarity: ", max_score)
 
 # Add CSS for styling
 components.html('''
